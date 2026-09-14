@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.DS_Store
+node_modules/
+package-lock.json
+frontend/dist/
+uploads/
+data/
+*.log
+.env
+.env.local
+.vite/

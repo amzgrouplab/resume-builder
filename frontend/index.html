@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vellum — Resume atelier</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css?v=4" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="wordmark">Vellum</div>
+          <div class="brand-kicker">Resume atelier</div>
+        </div>
+        <nav class="nav">
+          <button type="button" id="nav-studio" class="active">Studio</button>
+          <button type="button" id="nav-profiles">Profiles</button>
+          <button type="button" id="nav-settings">Settings</button>
+        </nav>
+        <div id="key-chip" class="key-chip">No API key yet</div>
+      </header>
+
+      <main class="shell">
+        <section id="studio">
+          <div class="hero">
+            <div>
+              <h1>Tailor the words. Keep the document.</h1>
+              <p>
+                Choose a saved profile or drop a Word resume, then paste a job description.
+                Vellum rewrites only the bullet points so layout, type, and project detail stay real.
+              </p>
+            </div>
+            <div class="promise">
+              <strong>What stays frozen</strong>
+              Headers, dates, employers, education, fonts, and page geometry stay put. Each
+              rewritten bullet keeps the original line length and the original systems and projects.
+            </div>
+          </div>
+
+          <div class="desk">
+            <article class="card">
+              <h2>Your resume</h2>
+              <p class="lede">Select a profile, or upload a .docx once and save it.</p>
+              <div class="field">
+                <label for="profile-select">Saved profile</label>
+                <select id="profile-select">
+                  <option value="">Upload a new file…</option>
+                </select>
+              </div>
+              <div id="drop" class="drop">
+                <div>
+                  <strong id="drop-title">Drop your Word resume</strong>
+                  <span id="drop-hint">or choose a .docx from your computer</span>
+                  <div>
+                    <button class="file-btn" id="choose-file" type="button">Choose file</button>
+                  </div>
+                </div>
+              </div>
+              <input id="file-input" type="file" hidden accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+              <div id="file-meta" class="file-meta hidden"></div>
+              <div id="roles" class="roles"></div>
+              <div class="actions" id="save-profile-row">
+                <button class="ghost hidden" id="save-profile" type="button">Save as profile</button>
+              </div>
+            </article>
+
+            <article class="card">
+              <h2>Job description</h2>
+              <p class="lede">Paste the full posting. The rewrite uses the whole JD against the whole resume.</p>
+              <textarea
+                id="job"
+                placeholder="Paste the full job description, including the stack, responsibilities, and preferred qualifications."
+              ></textarea>
+              <div class="actions">
+                <button class="primary" id="run" type="button" disabled>Update resume</button>
+                <div class="timer" id="timer">Runs by role until the full resume is done</div>
+              </div>
+              <div id="key-warning" class="error hidden">
+                Add an OpenAI API key in Settings before tailoring.
+                <button class="ghost" id="open-settings" type="button">Open settings</button>
+              </div>
+              <div id="error" class="error hidden"></div>
+              <div id="progress" class="progress hidden">
+                <ol id="stages"></ol>
+              </div>
+            </article>
+          </div>
+
+          <section id="results" class="results hidden">
+            <div class="results-head">
+              <div>
+                <h2>Updated bullets</h2>
+                <div class="stat-row" id="stats"></div>
+              </div>
+              <button class="primary" id="download" type="button">Download Word file</button>
+            </div>
+            <p class="notes" id="notes"></p>
+            <div class="diff-list" id="diffs"></div>
+          </section>
+        </section>
+
+        <section id="profiles" class="settings hidden">
+          <div>
+            <h1>Profiles</h1>
+            <p class="intro">
+              Save each person’s Word resume once. In Studio, pick the profile and paste a job
+              description — no re-upload.
+            </p>
+          </div>
+          <div class="card">
+            <div class="field">
+              <label for="profile-name">Profile name</label>
+              <input id="profile-name" type="text" placeholder="Trevor Atchley" />
+            </div>
+            <div id="profile-drop" class="drop">
+              <div>
+                <strong id="profile-drop-title">Drop a Word resume to save</strong>
+                <span>This file becomes the frozen original for every later JD.</span>
+                <div>
+                  <button class="file-btn" id="choose-profile-file" type="button">Choose file</button>
+                </div>
+              </div>
+            </div>
+            <input id="profile-file-input" type="file" hidden accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+            <div class="actions">
+              <button class="primary" id="create-profile" type="button" disabled>Create profile</button>
+            </div>
+            <div id="profile-error" class="error hidden"></div>
+            <div id="profile-list" class="profile-list"></div>
+          </div>
+        </section>
+
+        <section id="settings" class="settings hidden">
+          <div>
+            <h1>Settings</h1>
+            <p class="intro">
+              Your OpenAI key stays in this browser and is sent only to the local Vellum server,
+              which calls OpenAI for the rewrite. It is not written to disk on the server.
+            </p>
+          </div>
+          <div class="card">
+            <div class="field">
+              <label for="apiKey">OpenAI API key</label>
+              <input id="apiKey" type="password" autocomplete="off" placeholder="sk-…" />
+            </div>
+            <div class="field">
+              <label for="model">Model</label>
+              <select id="model">
+                <option value="gpt-4o">GPT-4o — best quality / speed balance</option>
+                <option value="gpt-4.1">GPT-4.1 — stronger instruction following</option>
+                <option value="gpt-4o-mini">GPT-4o mini — fastest, lighter edit</option>
+                <option value="gpt-5">GPT-5 — if your account has it</option>
+                <option value="gpt-5-mini">GPT-5 mini</option>
+              </select>
+            </div>
+            <label class="toggle">
+              <input id="strictTimeline" type="checkbox" checked />
+              <span>
+                <b>Honor technology launch dates.</b> If a job posting asks for a tool that did not
+                exist during a role, that keyword is not written into that role.
+              </span>
+            </label>
+            <label class="toggle">
+              <input id="matchLength" type="checkbox" checked />
+              <span>
+                <b>Keep original bullet length.</b> Each rewrite must stay within 6% of the original
+                character count so the page does not reflow.
+              </span>
+            </label>
+            <div class="actions">
+              <button class="ghost" id="test-key" type="button">Test key</button>
+            </div>
+            <div id="test-state"></div>
+            <p class="fine-print">
+              Long resumes are rewritten role by role so the full document and the full job
+              description are used. Time is not capped at 30 seconds. The Word file you download is
+              your original document with list-item text replaced in place.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="/app.js?v=4"></script>
+  </body>
+</html>
