@@ -44,6 +44,7 @@ class ResumeParagraph:
     end_year: int | None
     is_current_role: bool
     char_budget: int
+    is_summary: bool = False
 
     def to_public(self) -> dict[str, Any]:
         data = asdict(self)
@@ -141,19 +142,25 @@ def parse_document(path: str, present_year: int = 2026) -> tuple[Document, list[
     header_window: list[str] = []
     current_dates: RoleDates | None = None
     current_title = ""
+    in_summary = False
 
     for index, (paragraph, in_table) in enumerate(raw):
         text = paragraph.text.replace("\xa0", " ").strip()
         bullet = is_bullet_paragraph(paragraph) if text else False
+        summary_body = False
         if text and not bullet:
             if _looks_like_section(text):
                 header_window = []
                 lower = text.lower()
+                in_summary = "summary" in lower
                 if any(hint in lower for hint in ("skill", "summary")):
                     current_dates = None
                     current_title = " ".join(text.split())
                 elif "education" in lower:
                     current_dates = None
+                    in_summary = False
+                elif any(hint in lower for hint in ("experience", "employment", "work history")):
+                    in_summary = False
             else:
                 header_window = (header_window + [text])[-4:]
                 dates = parse_role_dates(text, present_year)
@@ -167,7 +174,11 @@ def parse_document(path: str, present_year: int = 2026) -> tuple[Document, list[
                         current_title = remainder
                 elif _looks_like_role_header(text):
                     current_title = text
+                elif in_summary and len(text) > 60:
+                    summary_body = True
+                    current_title = current_title or "PROFESSIONAL SUMMARY"
 
+        tailorable = bullet or summary_body
         role_dates = current_dates.prompt_line() if current_dates else ""
         rows.append(
             ResumeParagraph(
@@ -177,12 +188,13 @@ def parse_document(path: str, present_year: int = 2026) -> tuple[Document, list[
                 style_name=_style_name(paragraph),
                 in_table=in_table,
                 manual_prefix=_prefix_of(paragraph.text.lstrip()) if bullet else "",
-                role_title=current_title if bullet else "",
-                role_dates=role_dates if bullet else "",
-                start_year=current_dates.start_year if current_dates and bullet else None,
-                end_year=current_dates.end_year if current_dates and bullet else None,
-                is_current_role=bool(current_dates and current_dates.is_current) if bullet else False,
-                char_budget=len(BULLET_PREFIX_RE.sub("", text).strip()) if bullet else 0,
+                role_title=current_title if tailorable else "",
+                role_dates=role_dates if (bullet and not summary_body) else "",
+                start_year=current_dates.start_year if current_dates and bullet and not summary_body else None,
+                end_year=current_dates.end_year if current_dates and bullet and not summary_body else None,
+                is_current_role=bool(current_dates and current_dates.is_current) if bullet and not summary_body else False,
+                char_budget=len(BULLET_PREFIX_RE.sub("", text).strip()) if tailorable else 0,
+                is_summary=summary_body,
             )
         )
     return doc, rows
@@ -190,6 +202,7 @@ def parse_document(path: str, present_year: int = 2026) -> tuple[Document, list[
 
 def summarize_parse(rows: list[ResumeParagraph]) -> dict[str, Any]:
     bullets = [r for r in rows if r.is_bullet and r.text]
+    summaries = [r for r in rows if r.is_summary and r.text]
     roles: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
     for bullet in bullets:
@@ -211,6 +224,7 @@ def summarize_parse(rows: list[ResumeParagraph]) -> dict[str, Any]:
     return {
         "paragraphs": len(rows),
         "bullets": len(bullets),
+        "summaries": len(summaries),
         "roles": roles,
         "preview": [b.to_public() for b in bullets],
     }

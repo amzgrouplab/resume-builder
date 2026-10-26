@@ -39,7 +39,7 @@ TECHNOLOGIES: tuple[Technology, ...] = (
     Technology("TypeScript", 2012, ()),
     Technology("C#", 2000, ("csharp", "c sharp")),
     Technology("C++", 1985, ("cpp",)),
-    Technology("Golang", 2009, ("golang", "go lang")),
+    Technology("Go", 2009, ("golang", "go lang", "go-lang")),
     Technology("Rust", 2015, ()),
     Technology("Kotlin", 2016, ()),
     Technology("Swift", 2014, ()),
@@ -160,11 +160,12 @@ TECHNOLOGIES: tuple[Technology, ...] = (
     Technology("TensorFlow", 2015, ()),
     Technology("PyTorch", 2016, ()),
     Technology("Keras", 2015, ()),
-    Technology("scikit-learn", 2007, ("sklearn",)),
+    Technology("scikit-learn", 2007, ("sklearn", "scikit learn")),
     Technology("Hugging Face", 2016, ("huggingface",)),
     Technology("Transformers", 2018, ("hugging face transformers",)),
     Technology("LangChain", 2022, ()),
     Technology("LangGraph", 2024, ()),
+    Technology("Temporal", 2019, ("temporal.io", "temporal workflows")),
     Technology("LlamaIndex", 2022, ("llama index", "gpt index")),
     Technology("OpenAI API", 2020, ("openai",)),
     Technology("GPT-3", 2020, ("gpt3",)),
@@ -221,6 +222,20 @@ TECHNOLOGIES: tuple[Technology, ...] = (
     Technology("Snowflake Cortex", 2024, ("cortex",)),
     Technology("Databricks Mosaic", 2023, ("mosaicml", "mosaic ai")),
     Technology("A2A", 2025, ("agent2agent", "agent-to-agent")),
+    Technology("SQL", 1974, ()),
+    Technology("REST", 2000, ("rest api", "rest apis", "restful")),
+    Technology("CI/CD", 2008, ("ci cd", "ci/cd", "ci-cd", "cicd")),
+    Technology("MLOps", 2018, ("ml ops", "mlops")),
+    Technology("LLM", 2018, ("large language model", "llms", "llm-based")),
+    Technology("Prompt Engineering", 2020, ("prompt configuration", "prompt templates", "prompt engineering")),
+    Technology("GitHub Copilot", 2021, ("github copilot",)),
+    Technology("Microsoft Copilot", 2023, ("copilot studio", "copilots", "co pilots", "co-pilots", "copilot")),
+    Technology("Codex", 2021, ("openai codex",)),
+    Technology("HIPAA", 1996, ()),
+    Technology("Azure ML", 2015, ("azure machine learning", "azureml", "azure ml")),
+    Technology("Azure DevOps", 2018, ("azure devops",)),
+    Technology("AI Agents", 2023, ("intelligent agents", "ai agents", "agentic")),
+    Technology("PySpark", 2014, ("pyspark",)),
 )
 
 
@@ -287,3 +302,7 @@ def format_timeline_for_prompt(rows: list[dict[str, int | str]]) -> str:
     if not rows:
         return "No specific tool launch dates matched the job description."
     return "\n".join(f"- {row['name']}: launched {row['launched']}" for row in rows)
+
+
+def tech_index() -> dict[str, Technology]:
+    return {item.name: item for item in TECHNOLOGIES}

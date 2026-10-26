@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css?v=4" />
+    <link rel="stylesheet" href="/styles.css?v=12" />
   </head>
   <body>
     <div class="app">
@@ -33,8 +33,8 @@
             <div>
               <h1>Tailor the words. Keep the document.</h1>
               <p>
-                Choose a saved profile or drop a Word resume, then paste a job description.
-                Vellum rewrites only the bullet points so layout, type, and project detail stay real.
+                One platform for any professional role. Paste a job description, optionally pick a
+                target role, and Vellum rewrites only the bullets so layout and real experience stay put.
               </p>
             </div>
             <div class="promise">
@@ -78,12 +78,35 @@
                 id="job"
                 placeholder="Paste the full job description, including the stack, responsibilities, and preferred qualifications."
               ></textarea>
+              <div class="field-row">
+                <div class="field">
+                  <label for="role-filter">Search target role</label>
+                  <input id="role-filter" type="search" placeholder="AI architect, data engineer, custom…" />
+                </div>
+                <div class="field">
+                  <label for="target-role">Target role</label>
+                  <select id="target-role">
+                    <option value="">Auto-detect from job description</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="seniority">Seniority</label>
+                  <select id="seniority">
+                    <option value="">Auto</option>
+                    <option value="mid">Mid</option>
+                    <option value="senior">Senior</option>
+                    <option value="staff">Staff</option>
+                    <option value="principal">Principal</option>
+                  </select>
+                </div>
+              </div>
+              <div id="jd-stack" class="stack-box hidden"></div>
               <div class="actions">
                 <button class="primary" id="run" type="button" disabled>Update resume</button>
                 <div class="timer" id="timer">Runs by role until the full resume is done</div>
               </div>
               <div id="key-warning" class="error hidden">
-                Add an OpenAI API key in Settings before tailoring.
+                Add an OpenAI or Anthropic API key in Settings before tailoring.
                 <button class="ghost" id="open-settings" type="button">Open settings</button>
               </div>
               <div id="error" class="error hidden"></div>
@@ -102,6 +125,7 @@
               <button class="primary" id="download" type="button">Download Word file</button>
             </div>
             <p class="notes" id="notes"></p>
+            <div id="coverage" class="stack-box hidden"></div>
             <div class="diff-list" id="diffs"></div>
           </section>
         </section>
@@ -141,23 +165,42 @@
           <div>
             <h1>Settings</h1>
             <p class="intro">
-              Your OpenAI key stays in this browser and is sent only to the local Vellum server,
-              which calls OpenAI for the rewrite. It is not written to disk on the server.
+              Keys stay in this browser and are sent only to the local Vellum server, which calls
+              OpenAI or Anthropic for the rewrite. They are not written to disk on the server.
             </p>
           </div>
           <div class="card">
+            <div class="field">
+              <label for="provider">Provider</label>
+              <select id="provider">
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+              </select>
+            </div>
             <div class="field">
               <label for="apiKey">OpenAI API key</label>
               <input id="apiKey" type="password" autocomplete="off" placeholder="sk-…" />
             </div>
             <div class="field">
+              <label for="anthropicKey">Anthropic API key</label>
+              <input id="anthropicKey" type="password" autocomplete="off" placeholder="sk-ant-…" />
+            </div>
+            <div class="field">
               <label for="model">Model</label>
               <select id="model">
-                <option value="gpt-4o">GPT-4o — best quality / speed balance</option>
-                <option value="gpt-4.1">GPT-4.1 — stronger instruction following</option>
-                <option value="gpt-4o-mini">GPT-4o mini — fastest, lighter edit</option>
-                <option value="gpt-5">GPT-5 — if your account has it</option>
-                <option value="gpt-5-mini">GPT-5 mini</option>
+                <optgroup label="OpenAI">
+                  <option value="gpt-4o">GPT-4o — best quality / speed balance</option>
+                  <option value="gpt-4.1">GPT-4.1 — stronger instruction following</option>
+                  <option value="gpt-4o-mini">GPT-4o mini — fastest, lighter edit</option>
+                  <option value="gpt-5">GPT-5 — if your account has it</option>
+                  <option value="gpt-5-mini">GPT-5 mini</option>
+                </optgroup>
+                <optgroup label="Anthropic">
+                  <option value="claude-sonnet-4-5">Claude Sonnet 4.5 — best quality / speed</option>
+                  <option value="claude-opus-4-5">Claude Opus 4.5 — strongest rewrite</option>
+                  <option value="claude-haiku-4-5">Claude Haiku 4.5 — fastest</option>
+                  <option value="claude-opus-4-1">Claude Opus 4.1</option>
+                </optgroup>
               </select>
             </div>
             <label class="toggle">
@@ -170,7 +213,7 @@
             <label class="toggle">
               <input id="matchLength" type="checkbox" checked />
               <span>
-                <b>Keep original bullet length.</b> Each rewrite must stay within 6% of the original
+                <b>Keep original bullet length.</b> Each rewrite must stay within 10% of the original
                 character count so the page does not reflow.
               </span>
             </label>
@@ -180,13 +223,14 @@
             <div id="test-state"></div>
             <p class="fine-print">
               Long resumes are rewritten role by role so the full document and the full job
-              description are used. Time is not capped at 30 seconds. The Word file you download is
-              your original document with list-item text replaced in place.
+              description are used. Pick OpenAI or Anthropic in Settings; Vellum uses that
+              provider’s key and model. Time is not capped at 30 seconds. The Word file you
+              download is your original document with list-item text replaced in place.
             </p>
           </div>
         </section>
       </main>
     </div>
-    <script src="/app.js?v=4"></script>
+    <script src="/app.js?v=12"></script>
   </body>
 </html>

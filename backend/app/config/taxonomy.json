@@ -1,0 +1,73 @@
+{
+  "domains": {
+    "ai_llm": {
+      "label": "AI / LLM / Agentic AI",
+      "terms": [
+        "OpenAI", "Azure OpenAI", "Azure AI Foundry", "Anthropic Claude", "Gemini",
+        "Vertex AI", "Amazon Bedrock", "LangGraph", "LangChain", "CrewAI", "AutoGen",
+        "Semantic Kernel", "MCP", "A2A", "RAG", "hybrid search", "embeddings",
+        "multi-agent orchestration", "tool calling", "HITL", "LLM"
+      ]
+    },
+    "machine_learning": {
+      "label": "Machine Learning",
+      "terms": [
+        "Python", "PyTorch", "TensorFlow", "scikit-learn", "XGBoost", "LightGBM",
+        "Hugging Face", "fine-tuning", "LoRA", "QLoRA", "PEFT", "model training",
+        "feature engineering", "ONNX", "TensorRT"
+      ]
+    },
+    "ml_platform": {
+      "label": "ML Platform / MLOps",
+      "terms": [
+        "MLflow", "Kubeflow", "KServe", "BentoML", "Feast", "model registry",
+        "feature store", "batch inference", "model deployment", "MLOps", "CI/CD"
+      ]
+    },
+    "ai_evaluation": {
+      "label": "AI Evaluation / LLMOps",
+      "terms": [
+        "RAGAS", "DeepEval", "LangSmith", "golden datasets", "groundedness",
+        "hallucination detection", "prompt versioning", "evaluation"
+      ]
+    },
+    "data_analytics": {
+      "label": "Data / Analytics",
+      "terms": [
+        "Databricks", "PySpark", "Spark", "Delta Lake", "BigQuery", "Snowflake",
+        "PostgreSQL", "SQL Server", "Oracle", "MongoDB", "Redis", "Kafka",
+        "Airflow", "ETL", "data pipelines", "SQL"
+      ]
+    },
+    "backend_fullstack": {
+      "label": "Backend / Full-Stack",
+      "terms": [
+        "Java", "Spring Boot", "Python", "FastAPI", "C#", ".NET", "Node.js",
+        "Go", "React", "Angular", "Vue", "Next.js", "TypeScript", "REST",
+        "GraphQL", "gRPC", "microservices"
+      ]
+    },
+    "cloud_devops": {
+      "label": "Cloud / DevOps",
+      "terms": [
+        "Azure", "AWS", "GCP", "Docker", "Kubernetes", "AKS", "EKS", "GKE",
+        "Helm", "Terraform", "GitHub Actions", "Jenkins", "Azure DevOps",
+        "Argo CD", "Prometheus", "Grafana", "OpenTelemetry"
+      ]
+    },
+    "security": {
+      "label": "Security / Governance",
+      "terms": [
+        "OAuth2", "OIDC", "JWT", "RBAC", "ABAC", "Key Vault", "IAM",
+        "HIPAA", "PHI", "SOC 2", "Responsible AI"
+      ]
+    },
+    "enterprise_architecture": {
+      "label": "AI / Enterprise Architecture",
+      "terms": [
+        "distributed systems", "microservices", "API gateways", "event-driven",
+        "multi-cloud", "tenant isolation", "resiliency", "scalability"
+      ]
+    }
+  }
+}

@@ -1,0 +1,231 @@
+{
+  "roles": [
+    {
+      "roleId": "ai-ml-engineer",
+      "displayName": "AI / ML Engineer",
+      "roleFamily": "ai_ml",
+      "specialization": "model development and production ML",
+      "aliases": [
+        "AI Engineer",
+        "Machine Learning Engineer",
+        "Senior AI/ML Engineer",
+        "Generative AI Engineer",
+        "LLM Engineer",
+        "Applied Scientist"
+      ],
+      "seniorityHints": ["mid", "senior", "staff", "principal"],
+      "coreCompetencies": [
+        "model development",
+        "feature engineering",
+        "training",
+        "fine-tuning",
+        "validation",
+        "inference APIs",
+        "deployment"
+      ],
+      "suggestedSkillCategories": ["ai_llm", "machine_learning"],
+      "writingEmphasis": "Focus on model development, feature engineering, training, fine-tuning, validation, experimentation, inference APIs, production deployment, testing, and performance optimization. Keep the real systems and datasets.",
+      "expectedResponsibilityCategories": ["modeling", "evaluation", "deployment"],
+      "scoringWeights": { "technical": 0.5, "architecture": 0.2, "impact": 0.3 },
+      "promptTemplateVersion": 1
+    },
+    {
+      "roleId": "agentic-ai-engineer",
+      "displayName": "Agentic AI Engineer",
+      "roleFamily": "agentic_ai",
+      "specialization": "multi-agent systems and tool-using LLM apps",
+      "aliases": ["Agentic AI Engineer", "AI Agent Engineer", "LLM Agent Engineer"],
+      "seniorityHints": ["senior", "staff", "principal"],
+      "coreCompetencies": [
+        "multi-agent workflows",
+        "tool calling",
+        "RAG",
+        "agent state",
+        "evaluation",
+        "observability"
+      ],
+      "suggestedSkillCategories": ["ai_llm", "ai_evaluation"],
+      "writingEmphasis": "Focus on multi-agent workflows, orchestration, tool calling, agent state, checkpointing, retries, memory, RAG, human approvals, evaluation, and observability. Preserve named agent patterns and tools already in the resume.",
+      "expectedResponsibilityCategories": ["agents", "retrieval", "evaluation"],
+      "scoringWeights": { "technical": 0.55, "architecture": 0.25, "impact": 0.2 },
+      "promptTemplateVersion": 1
+    },
+    {
+      "roleId": "ai-platform-engineer",
+      "displayName": "AI Platform Engineer",
+      "roleFamily": "ai_platform",
+      "specialization": "AI infrastructure and model serving",
+      "aliases": ["AI Platform Engineer", "ML Platform Engineer", "AI Infrastructure Engineer"],
+      "seniorityHints": ["senior", "staff", "principal"],
+      "coreCompetencies": [
+        "model serving",
+        "orchestration",
+        "Kubernetes",
+        "CI/CD",
+        "observability",
+        "GPU workloads"
+      ],
+      "suggestedSkillCategories": ["ml_platform", "cloud_devops"],
+      "writingEmphasis": "Focus on AI infrastructure, model-serving systems, AI gateways, model registries, orchestration, distributed compute, Kubernetes, GPU workloads, CI/CD, observability, reliability, cost management, and production platform operations.",
+      "expectedResponsibilityCategories": ["platform", "reliability", "security"],
+      "scoringWeights": { "technical": 0.45, "architecture": 0.3, "impact": 0.25 },
+      "promptTemplateVersion": 1
+    },
+    {
+      "roleId": "ai-architect",
+      "displayName": "AI / Enterprise Architect",
+      "roleFamily": "ai_architecture",
+      "specialization": "end-to-end AI solution architecture",
+      "aliases": [
+        "AI Solutions Architect",
+        "Enterprise AI Architect",
+        "Principal AI Architect",
+        "Machine Learning Architect",
+        "Enterprise Architect"
+      ],
+      "seniorityHints": ["senior", "staff", "principal"],
+      "coreCompetencies": [
+        "reference architectures",
+        "governance",
+        "integration",
+        "security",
+        "scalability"
+      ],
+      "suggestedSkillCategories": ["enterprise_architecture", "ai_llm", "security"],
+      "writingEmphasis": "Focus on end-to-end AI solution architecture, reference architectures, enterprise integration, technology selection, multi-agent design, governance, security, scalability, platform strategy, architectural tradeoffs, and implementation ownership. Do not replace hands-on work with empty strategy language.",
+      "expectedResponsibilityCategories": ["architecture", "governance", "integration"],
+      "scoringWeights": { "technical": 0.3, "architecture": 0.45, "impact": 0.25 },
+      "promptTemplateVersion": 1
+    },
+    {
+      "roleId": "mlops-engineer",
+      "displayName": "MLOps / LLMOps Engineer",
+      "roleFamily": "mlops",
+      "specialization": "ML lifecycle automation",
+      "aliases": ["MLOps Engineer", "LLMOps Engineer", "ML Platform Engineer"],
+      "seniorityHints": ["mid", "senior", "staff"],
+      "coreCompetencies": [
+        "experiment tracking",
+        "model registry",
+        "training pipelines",
+        "deployment",
+        "monitoring",
+        "drift detection"
+      ],
+      "suggestedSkillCategories": ["ml_platform", "ai_evaluation", "cloud_devops"],
+      "writingEmphasis": "Focus on ML lifecycle automation, experiment tracking, model registry, training pipelines, deployment, feature stores, inference, monitoring, drift detection, and rollback. Keep pipeline and platform names from the original.",
+      "expectedResponsibilityCategories": ["lifecycle", "monitoring", "deployment"],
+      "scoringWeights": { "technical": 0.5, "architecture": 0.25, "impact": 0.25 },
+      "promptTemplateVersion": 1
+    },
+    {
+      "roleId": "data-scientist",
+      "displayName": "Data Scientist",
+      "roleFamily": "data_science",
+      "specialization": "analysis, modeling, and experimentation",
+      "aliases": ["Data Scientist", "Applied Scientist"],
+      "seniorityHints": ["mid", "senior", "staff", "principal"],
+      "coreCompetencies": [
+        "statistical analysis",
+        "feature engineering",
+        "experimentation",
+        "model selection",
+        "validation"
+      ],
+      "suggestedSkillCategories": ["machine_learning", "data_analytics"],
+      "writingEmphasis": "Focus on statistical analysis, feature engineering, experimentation, model selection, validation, predictive modeling, data interpretation, and demonstrated business impact. Keep real metrics only if they already appear.",
+      "expectedResponsibilityCategories": ["analysis", "modeling", "experimentation"],
+      "scoringWeights": { "technical": 0.4, "architecture": 0.15, "impact": 0.45 },
+      "promptTemplateVersion": 1
+    },
+    {
+      "roleId": "data-engineer",
+      "displayName": "Data Engineer",
+      "roleFamily": "data_engineering",
+      "specialization": "pipelines and data platforms",
+      "aliases": ["Data Engineer", "Analytics Engineer"],
+      "seniorityHints": ["mid", "senior", "staff"],
+      "coreCompetencies": [
+        "data pipelines",
+        "ETL/ELT",
+        "Spark",
+        "warehousing",
+        "data quality",
+        "SQL"
+      ],
+      "suggestedSkillCategories": ["data_analytics", "cloud_devops"],
+      "writingEmphasis": "Focus on data pipelines, ETL/ELT, Spark, Databricks, cloud data platforms, distributed processing, data quality, schema evolution, orchestration, and SQL tuning. Preserve named pipelines and stores.",
+      "expectedResponsibilityCategories": ["pipelines", "quality", "platform"],
+      "scoringWeights": { "technical": 0.5, "architecture": 0.25, "impact": 0.25 },
+      "promptTemplateVersion": 1
+    },
+    {
+      "roleId": "software-engineer",
+      "displayName": "Software Engineer",
+      "roleFamily": "software",
+      "specialization": "application engineering",
+      "aliases": [
+        "Backend Engineer",
+        "Full-Stack Engineer",
+        "Frontend Engineer",
+        "Java Software Engineer",
+        "Python Software Engineer",
+        "Software Engineer"
+      ],
+      "seniorityHints": ["mid", "senior", "staff", "principal"],
+      "coreCompetencies": [
+        "API design",
+        "application architecture",
+        "testing",
+        "debugging",
+        "scalability"
+      ],
+      "suggestedSkillCategories": ["backend_fullstack", "cloud_devops"],
+      "writingEmphasis": "Focus on the candidate's actual stack from the resume and JD — backend, frontend, or both. Emphasize API design, application architecture, database work, testing, debugging, scalability, security, and CI/CD. Never assume Java, React, or Spring Boot unless evidenced.",
+      "expectedResponsibilityCategories": ["implementation", "testing", "delivery"],
+      "scoringWeights": { "technical": 0.5, "architecture": 0.25, "impact": 0.25 },
+      "promptTemplateVersion": 1
+    },
+    {
+      "roleId": "cloud-devops-engineer",
+      "displayName": "Cloud / DevOps Engineer",
+      "roleFamily": "cloud_devops",
+      "specialization": "infrastructure and reliability",
+      "aliases": [
+        "Cloud Engineer",
+        "DevOps Engineer",
+        "Site Reliability Engineer",
+        "Cloud Solutions Architect",
+        "Security Engineer"
+      ],
+      "seniorityHints": ["mid", "senior", "staff", "principal"],
+      "coreCompetencies": [
+        "infrastructure",
+        "Kubernetes",
+        "IaC",
+        "CI/CD",
+        "observability",
+        "reliability"
+      ],
+      "suggestedSkillCategories": ["cloud_devops", "security"],
+      "writingEmphasis": "Focus on infrastructure provisioning, containers, Kubernetes, IaC, networking, CI/CD, automation, observability, deployment strategies, reliability, and production incident management. Use only clouds and tools already on the resume.",
+      "expectedResponsibilityCategories": ["infrastructure", "reliability", "security"],
+      "scoringWeights": { "technical": 0.45, "architecture": 0.3, "impact": 0.25 },
+      "promptTemplateVersion": 1
+    },
+    {
+      "roleId": "custom",
+      "displayName": "Other / Custom",
+      "roleFamily": "custom",
+      "specialization": "derived from the job description",
+      "aliases": ["Other", "Custom"],
+      "seniorityHints": ["junior", "mid", "senior", "staff", "principal"],
+      "coreCompetencies": [],
+      "suggestedSkillCategories": [],
+      "writingEmphasis": "Derive the writing strategy from the actual job description and verified candidate experience. Do not assume software engineering. Emphasize responsibilities, tools, and outcomes that appear in both the JD and the resume.",
+      "expectedResponsibilityCategories": ["role-specific"],
+      "scoringWeights": { "technical": 0.4, "architecture": 0.2, "impact": 0.4 },
+      "promptTemplateVersion": 1
+    }
+  ]
+}

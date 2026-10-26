@@ -3,6 +3,7 @@ uvicorn[standard]==0.34.0
 python-docx==1.1.2
 python-multipart==0.0.20
 openai==1.65.2
+anthropic==0.71.1
 pydantic==2.10.6
 pytest==8.3.5
 lxml==5.3.1

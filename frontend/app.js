@@ -1,15 +1,22 @@
 const STORAGE_KEY = "vellum.settings.v1";
 const LAST_PROFILE_KEY = "vellum.lastProfile";
+const OPENAI_MODELS = ["gpt-4o", "gpt-4.1", "gpt-4o-mini", "gpt-5", "gpt-5-mini"];
+const ANTHROPIC_MODELS = ["claude-sonnet-4-5", "claude-opus-4-5", "claude-haiku-4-5", "claude-opus-4-1"];
+const DEFAULT_MODEL = { openai: "gpt-4o", anthropic: "claude-sonnet-4-5" };
 const STAGES = [
   "Reading the Word document",
+  "Classifying the target role and extracting the JD stack",
   "Mapping roles and dates",
   "Checking technology launch years",
-  "Rewriting each role against the job description",
+  "Weaving evidenced tools into each role",
   "Putting text back into the original layout",
 ];
 
 const defaultSettings = {
   apiKey: "",
+  openaiKey: "",
+  anthropicKey: "",
+  provider: "openai",
   model: "gpt-4o",
   strictTimeline: true,
   matchLength: true,
@@ -25,11 +32,22 @@ const state = {
   busy: false,
   view: "studio",
   newProfileFile: null,
+  roles: [],
 };
 
 function loadSettings() {
   try {
-    return { ...defaultSettings, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") };
+    const merged = { ...defaultSettings, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") };
+    if (!merged.openaiKey && merged.apiKey) merged.openaiKey = merged.apiKey;
+    if ((merged.model || "").startsWith("claude")) merged.provider = "anthropic";
+    if (merged.provider === "anthropic" && !ANTHROPIC_MODELS.includes(merged.model)) {
+      merged.model = DEFAULT_MODEL.anthropic;
+    }
+    if (merged.provider !== "anthropic" && !OPENAI_MODELS.includes(merged.model)) {
+      merged.provider = "openai";
+      if (!OPENAI_MODELS.includes(merged.model)) merged.model = DEFAULT_MODEL.openai;
+    }
+    return merged;
   } catch {
     return { ...defaultSettings };
   }
@@ -119,10 +137,23 @@ function setView(view) {
   $("nav-settings").classList.toggle("active", view === "settings");
 }
 
+function activeProvider() {
+  return state.settings.provider === "anthropic" ? "anthropic" : "openai";
+}
+
+function activeKey() {
+  return activeProvider() === "anthropic" ? state.settings.anthropicKey : state.settings.openaiKey || state.settings.apiKey;
+}
+
+function providerLabel() {
+  return activeProvider() === "anthropic" ? "Anthropic" : "OpenAI";
+}
+
 function renderKeyChip() {
   const chip = $("key-chip");
-  if (state.settings.apiKey) {
-    chip.textContent = `OpenAI ${maskKey(state.settings.apiKey)}`;
+  const key = activeKey();
+  if (key) {
+    chip.textContent = `${providerLabel()} ${maskKey(key)}`;
     chip.classList.add("ready");
     $("key-warning").classList.add("hidden");
   } else {
@@ -137,7 +168,7 @@ function hasResume() {
 }
 
 function syncRunButton() {
-  $("run").disabled = !(hasResume() && $("job").value.trim().length > 40 && state.settings.apiKey && !state.busy);
+  $("run").disabled = !(hasResume() && $("job").value.trim().length > 40 && activeKey() && !state.busy);
   $("save-profile").classList.toggle("hidden", !(state.file && !state.profileId));
   $("create-profile").disabled = !(state.newProfileFile && $("profile-name").value.trim());
 }
@@ -189,10 +220,90 @@ function renderProgress(stage, visible) {
   }).join("");
 }
 
+function renderChips(items, className = "") {
+  if (!items || !items.length) return "";
+  return `<div class="chips">${items
+    .map((item) => `<span class="chip ${className}">${esc(item)}</span>`)
+    .join("")}</div>`;
+}
+
+function renderJdStack(stack) {
+  const box = $("jd-stack");
+  if (!stack || !(stack.all || stack.required || []).length) {
+    box.classList.add("hidden");
+    box.innerHTML = "";
+    return;
+  }
+  const required = stack.required || [];
+  const preferred = stack.preferred || [];
+  const domains = stack.domains || [];
+  box.classList.remove("hidden");
+  box.innerHTML = `
+    <h3>${stack.source === "llm" ? "LLM-extracted job stack" : "Detected job stack"}</h3>
+    ${stack.role_display ? `<p>Role profile: ${esc(stack.role_display)}${stack.seniority ? ` · ${esc(stack.seniority)}` : ""}</p>` : ""}
+    ${required.length ? `<p>Required skills · date-safe mentions across matching lines</p>${renderChips(required, "priority")}` : ""}
+    ${preferred.length ? `<p>Preferred skills · date-safe mentions</p>${renderChips(preferred)}` : ""}
+    ${domains.length ? `<p>Domain</p>${renderChips(domains, "domain")}` : ""}
+  `;
+}
+
+function renderCoverage(stack) {
+  const box = $("coverage");
+  if (!stack) {
+    box.classList.add("hidden");
+    box.innerHTML = "";
+    return;
+  }
+  const placed = stack.placed || [];
+  const missing = stack.missing || [];
+  if (!placed.length && !missing.length) {
+    box.classList.add("hidden");
+    box.innerHTML = "";
+    return;
+  }
+  box.classList.remove("hidden");
+  box.innerHTML = `
+    <h3>Job-stack coverage</h3>
+    ${placed.length ? `<p>Placed on the resume</p>${renderChips(placed, "placed")}` : ""}
+    ${missing.length ? `<p>Not placed: no related experience on this resume (for example a vendor product never used), or the latest job ended before the tool launched.</p>${renderChips(missing, "missing")}` : ""}
+  `;
+}
+
+let stackTimer = 0;
+async function previewJdStack() {
+  const text = $("job").value.trim();
+  if (text.length < 40) {
+    renderJdStack(null);
+    return;
+  }
+  try {
+    const res = await fetch("/api/stack", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-OpenAI-Key": state.settings.openaiKey || state.settings.apiKey || "",
+        "X-Anthropic-Key": state.settings.anthropicKey || "",
+      },
+      body: JSON.stringify({
+        job_description: text,
+        model: state.settings.model,
+        provider: activeProvider(),
+        selected_role: $("target-role") ? $("target-role").value : "",
+        seniority: $("seniority") ? $("seniority").value : "",
+      }),
+    });
+    if (!res.ok) return;
+    renderJdStack(await res.json());
+  } catch {
+    /* ignore preview errors */
+  }
+}
+
 function renderResults(result) {
   const section = $("results");
   if (!result) {
     section.classList.add("hidden");
+    renderCoverage(null);
     return;
   }
   section.classList.remove("hidden");
@@ -205,6 +316,7 @@ function renderResults(result) {
     ${result.company ? `<span>aligned to <b>${esc(result.company)}</b></span>` : ""}
   `;
   $("notes").textContent = (result.notes || []).join(" ");
+  renderCoverage(result.stack);
   const ordered = [...changed, ...result.updates.filter((row) => !row.changed)];
   $("diffs").innerHTML = ordered
     .map((row) => {
@@ -265,7 +377,9 @@ async function loadProfiles() {
 }
 
 function hydrateSettings() {
-  $("apiKey").value = state.settings.apiKey;
+  $("provider").value = activeProvider();
+  $("apiKey").value = state.settings.openaiKey || state.settings.apiKey || "";
+  $("anthropicKey").value = state.settings.anthropicKey || "";
   $("model").value = state.settings.model;
   $("strictTimeline").checked = state.settings.strictTimeline;
   $("matchLength").checked = state.settings.matchLength;
@@ -362,16 +476,23 @@ async function tailor() {
     else body.append("resume", state.file);
     body.append("job_description", $("job").value);
     body.append("model", state.settings.model);
+    body.append("provider", activeProvider());
     body.append("strict_timeline", String(state.settings.strictTimeline));
     body.append("match_length", String(state.settings.matchLength));
+    body.append("selected_role", $("target-role") ? $("target-role").value : "");
+    body.append("seniority", $("seniority") ? $("seniority").value : "");
     const res = await fetch("/api/tailor", {
       method: "POST",
-      headers: { "X-OpenAI-Key": state.settings.apiKey },
+      headers: {
+        "X-OpenAI-Key": state.settings.openaiKey || state.settings.apiKey || "",
+        "X-Anthropic-Key": state.settings.anthropicKey || "",
+      },
       body,
     });
     if (!res.ok) throw new Error(await readError(res));
     const result = await res.json();
     state.result = result;
+    if (result.stack) renderJdStack(result.stack);
     $("timer").textContent = `${(result.elapsed_ms / 1000).toFixed(1)}s`;
     renderProgress(STAGES.length - 1, false);
     renderResults(result);
@@ -437,6 +558,29 @@ function bindDrop(el, onFile) {
   });
 }
 
+function fillRoleSelect(filter = "") {
+  const select = $("target-role");
+  if (!select) return;
+  const current = select.value;
+  const needle = filter.trim().toLowerCase();
+  const options = ['<option value="">Auto-detect from job description</option>'];
+  for (const role of state.roles) {
+    const hay = `${role.displayName} ${(role.aliases || []).join(" ")}`.toLowerCase();
+    if (needle && !hay.includes(needle)) continue;
+    options.push(`<option value="${esc(role.roleId)}">${esc(role.displayName)}</option>`);
+  }
+  select.innerHTML = options.join("");
+  if ([...select.options].some((item) => item.value === current)) select.value = current;
+}
+
+async function loadRoles() {
+  const res = await fetch("/api/roles");
+  if (!res.ok) return;
+  const data = await res.json();
+  state.roles = data.roles || [];
+  fillRoleSelect();
+}
+
 function bind() {
   $("nav-studio").addEventListener("click", () => setView("studio"));
   $("nav-profiles").addEventListener("click", () => setView("profiles"));
@@ -493,13 +637,27 @@ function bind() {
     }
   });
 
-  $("job").addEventListener("input", syncRunButton);
+  $("job").addEventListener("input", () => {
+    syncRunButton();
+    window.clearTimeout(stackTimer);
+    stackTimer = window.setTimeout(previewJdStack, 900);
+  });
+  if ($("role-filter")) {
+    $("role-filter").addEventListener("input", (event) => fillRoleSelect(event.target.value));
+  }
+  ["target-role", "seniority"].forEach((id) => {
+    if (!$(id)) return;
+    $(id).addEventListener("change", () => {
+      window.clearTimeout(stackTimer);
+      stackTimer = window.setTimeout(previewJdStack, 200);
+    });
+  });
   $("run").addEventListener("click", tailor);
   $("download").addEventListener("click", () => {
     if (state.result) downloadDocx(state.result.filename, state.result.docx_base64);
   });
 
-  ["apiKey", "model", "strictTimeline", "matchLength"].forEach((id) => {
+  ["provider", "apiKey", "anthropicKey", "model", "strictTimeline", "matchLength"].forEach((id) => {
     $(id).addEventListener("input", persistSettings);
     $(id).addEventListener("change", persistSettings);
   });
@@ -512,10 +670,14 @@ function bind() {
       const res = await fetch("/api/settings/test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ api_key: state.settings.apiKey, model: state.settings.model }),
+        body: JSON.stringify({
+          api_key: activeKey(),
+          model: state.settings.model,
+          provider: activeProvider(),
+        }),
       });
       if (!res.ok) throw new Error(await readError(res));
-      box.textContent = "Key accepted for this model.";
+      box.textContent = `${providerLabel()} key accepted for this model.`;
     } catch (err) {
       box.className = "error";
       box.textContent = err.message || "Could not verify the key.";
@@ -523,10 +685,29 @@ function bind() {
   });
 }
 
-function persistSettings() {
+function persistSettings(event) {
+  const source = event && event.target ? event.target.id : "";
+  let provider = $("provider").value === "anthropic" ? "anthropic" : "openai";
+  let model = $("model").value;
+  if (source === "provider") {
+    if (provider === "anthropic" && !ANTHROPIC_MODELS.includes(model)) model = DEFAULT_MODEL.anthropic;
+    if (provider === "openai" && !OPENAI_MODELS.includes(model)) model = DEFAULT_MODEL.openai;
+  } else if (source === "model") {
+    if (ANTHROPIC_MODELS.includes(model)) provider = "anthropic";
+    else if (OPENAI_MODELS.includes(model)) provider = "openai";
+  } else {
+    if (provider === "anthropic" && !ANTHROPIC_MODELS.includes(model)) model = DEFAULT_MODEL.anthropic;
+    if (provider === "openai" && !OPENAI_MODELS.includes(model)) model = DEFAULT_MODEL.openai;
+  }
+  $("provider").value = provider;
+  $("model").value = model;
+  const openaiKey = $("apiKey").value.trim();
   state.settings = {
-    apiKey: $("apiKey").value.trim(),
-    model: $("model").value,
+    apiKey: openaiKey,
+    openaiKey,
+    anthropicKey: $("anthropicKey").value.trim(),
+    provider,
+    model,
     strictTimeline: $("strictTimeline").checked,
     matchLength: $("matchLength").checked,
   };
@@ -539,6 +720,7 @@ hydrateSettings();
 renderKeyChip();
 bind();
 syncRunButton();
+loadRoles().catch(() => {});
 loadProfiles()
   .then(() => {
     if (state.profileId) return selectProfile(state.profileId);

@@ -12,20 +12,39 @@ from lxml import etree
 from .parse_resume import ResumeParagraph, _iter_body_paragraphs, _prefix_of
 
 
-def _first_run_properties(paragraph: Paragraph) -> etree._Element | None:
-    for run in paragraph._p.findall(qn("w:r")):
-        text_nodes = [t for t in run.findall(qn("w:t")) if (t.text or "").strip()]
-        if not text_nodes:
+def _run_text_len(run: etree._Element) -> int:
+    return sum(len(node.text or "") for node in run.findall(qn("w:t")))
+
+
+def _dominant_run_properties(paragraph: Paragraph) -> etree._Element | None:
+    """Use the run that holds most of the sentence so color/font stay with the body text."""
+    runs = [node for node in paragraph._p.iter() if node.tag == qn("w:r")]
+    if not runs:
+        return None
+    ranked = sorted(runs, key=_run_text_len, reverse=True)
+    for run in ranked:
+        if _run_text_len(run) <= 0:
             continue
         rpr = run.find(qn("w:rPr"))
-        return deepcopy(rpr) if rpr is not None else None
+        if rpr is not None:
+            return deepcopy(rpr)
+    for run in ranked:
+        rpr = run.find(qn("w:rPr"))
+        if rpr is not None:
+            return deepcopy(rpr)
     return None
 
 
 def replace_paragraph_text(paragraph: Paragraph, new_text: str, manual_prefix: str = "") -> None:
     """Keep paragraph properties, numbering, and the dominant run style."""
     p_elm = paragraph._p
-    rpr = _first_run_properties(paragraph)
+    rpr = _dominant_run_properties(paragraph)
+    if rpr is None:
+        ppr = paragraph._p.find(qn("w:pPr"))
+        if ppr is not None:
+            para_rpr = ppr.find(qn("w:rPr"))
+            if para_rpr is not None:
+                rpr = deepcopy(para_rpr)
     prefix = manual_prefix or _prefix_of(paragraph.text.lstrip())
     payload = new_text.strip()
     if prefix and not payload.startswith(prefix.strip()[0] if prefix.strip() else "\u2022"):
@@ -55,7 +74,7 @@ def apply_bullet_updates(
     for row in rows:
         if row.id not in updates:
             continue
-        if not row.is_bullet:
+        if not row.is_bullet and not row.is_summary:
             continue
         new_text = updates[row.id].strip()
         if not new_text or new_text == row.text:
